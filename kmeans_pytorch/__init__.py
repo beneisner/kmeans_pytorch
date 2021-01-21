@@ -61,7 +61,7 @@ def kmeans(
         print('resuming')
         # find data point closest to the initial cluster center
         initial_state = cluster_centers
-        dis = pairwise_distance_function(X, initial_state)
+        dis = pairwise_distance_function(X, initial_state, device)
         choice_points = torch.argmin(dis, dim=0)
         initial_state = X[choice_points]
         initial_state = initial_state.to(device)
@@ -71,14 +71,14 @@ def kmeans(
         tqdm_meter = tqdm(desc='[running kmeans]')
     while True:
         
-        dis = pairwise_distance_function(X, initial_state)
+        dis = pairwise_distance_function(X, initial_state, device)
 
         choice_cluster = torch.argmin(dis, dim=1)
 
         initial_state_pre = initial_state.clone()
 
         for index in range(num_clusters):
-            selected = torch.nonzero(choice_cluster == index).squeeze().to(device)
+            selected = torch.nonzero(choice_cluster == index).squeeze()
 
             selected = torch.index_select(X, 0, selected)
 
@@ -105,7 +105,7 @@ def kmeans(
         if iter_limit != 0 and iteration >= iter_limit:
             break
 
-    return choice_cluster.cpu(), initial_state.cpu()
+    return choice_cluster, initial_state
 
 
 def kmeans_predict(
